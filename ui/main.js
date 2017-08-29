@@ -32,15 +32,29 @@ button.onclick=function(){
 	request.open('GET','http://localhost:80/counter',true);
 	request.send(null);
 };
-var nameInput=document.getElementById('name');
-var name=nameInput.value;
+
 var submit=document.getElementById('sub_btn');
 submit.onclick= function(){
-		var list=``;
-		var names=['name1','name2','name3'];
-		for(var i=0;i<names.length;i++){
-			list=list+'<li>' +names[i]+'</li>';
+
+	var request=new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState===XMLHttpRequest.DONE)
+		{
+			if(request.status===200)
+			{
+				var list=``;
+				var names=request.responseText;
+				names=JSON.parse(names);
+				for(var i=0;i<names.length;i++){
+				list=list+'<li>' +names[i]+'</li>';
+				}
 			}
-		ul=document.getElementById('name_list');
-		ul.innerHTML=list;
+			ul=document.getElementById('name_list');
+			ul.innerHTML=list;
+		}
+	};
+		var nameInput=document.getElementById('name');
+	var name=nameInput.value;
+	request.open('GET','http://localhost:80/submit-name?name='+name,true);
+	request.send(null);
 };
