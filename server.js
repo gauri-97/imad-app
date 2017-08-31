@@ -1,8 +1,16 @@
 var express = require('express');
 var morgan = require('morgan');
 var path = require('path');
-
 var app = express();
+var Pool=require('pg').Pool;
+var config={
+	user:'postgres',
+	database:'postgres',
+	host:'localhost',
+	port:'5432',
+	password:'0000'
+};
+var pool=new Pool(config);
 app.use(morgan('combined'));
 var articles={
 	'article-one':
@@ -33,6 +41,20 @@ var articles={
 					</p>`
 	}
 };
+app.get('/database',function(rew,res){
+	pool.query('SELECT * from test',function(err,result){
+		if(err)
+		{
+			res.status(500).send(err.toString());
+		}
+		else
+		{
+			res.send(JSON.stringify(result));
+		}
+	});
+ 
+});
+
 function createtemplate(data){
 	var title=data.title;
 	var heading=data.heading;
