@@ -3,6 +3,7 @@ var morgan = require('morgan');
 var path = require('path');
 var app = express();
 var Pool=require('pg').Pool;
+var crypto=require('crypto');
 var config={
 	user:'postgres',
 	database:'postgres',
@@ -41,25 +42,13 @@ var articles={
 					</p>`
 	}
 };
-app.get('/database',function(rew,res){
-	pool.query('SELECT * from test',function(err,result){
-		if(err)
-		{
-			res.status(500).send(err.toString());
-		}
-		else
-		{
-			res.send(JSON.stringify(result.rows));
-		}
-	});
- 
-});
+
 
 function createtemplate(data){
-	var title=data.Title;
-	var heading=data.Heading;
+	var title=data.title;
+	var heading=data.heading;
 	var date=data.date;
-	var content=data.Content;
+	var content=data.content;
 	var template=`
 	<!doctype html>
 	<html>
@@ -74,7 +63,7 @@ function createtemplate(data){
 				<a href="/">Home</a>
 				</div>
 				<hr/>
-				<h2><b>${date}<b/><h2>
+				<h2><b>${date.toDateString()}<b/><h2>
 				<hr/>
 				<h3>${heading}</h3>
 				<div>
@@ -117,7 +106,7 @@ res.send(JSON.stringify(names));
 
 app.get('/:articlename',function(req,res){
 	var articlename=req.params.articlename;
-	pool.query("SELECT * from articles where Name='"+articlename+"'",function(err,result){
+	pool.query("SELECT * FROM articles WHERE name=$1",[articlename],function(err,result){
 		if(err)
 		{
 			res.status(500).send(err.toString());
@@ -131,8 +120,47 @@ app.get('/:articlename',function(req,res){
 			res.send(createtemplate(result.rows[0]));
 		}
 	});
-	
 });
+
+function hash(input,salt){
+	var hashed=crypto.pbkdf2Sync(input,salt,10000,512,'sha512');
+	return hashed.toString('hex');
+}
+
+app.get('/hash/:input',function(req,res){
+	var hashedString=hash(req.params.input,"Thisissalt")
+	res.send(hashedString)
+});
+
+app.get('/create-user',function(Req,res){
+	var salt=crypto.getRandomBytes(128).toString('hex');
+	var dbString=hash(password,salt);
+	pool.query('Insert into "user" (username,password) values ($1,$2)',[username,dbString],function(err,result){
+		if(err)
+		{
+			res.status(500).send(err.toString());
+		}
+		else
+		{
+			res.send("User successfully created"+username);
+		}
+});
+
+
+app.get('/database',function(rew,res){
+	pool.query('SELECT * from articles',function(err,result){
+		if(err)
+		{
+			res.status(500).send(err.toString());
+		}
+		else
+		{
+			res.send(JSON.stringify(result.rows));
+		}
+	});
+ 
+});
+	
 
 // Do not change port, otherwise your app won't run on IMAD servers
 // Use 8080 only for local development if you already have apache running on 80
