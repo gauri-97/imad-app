@@ -4,6 +4,7 @@ var path = require('path');
 var app = express();
 var Pool=require('pg').Pool;
 var crypto=require('crypto');
+var bodyParser=require('body-parser');
 var config={
 	user:'postgres',
 	database:'postgres',
@@ -13,6 +14,8 @@ var config={
 };
 var pool=new Pool(config);
 app.use(morgan('combined'));
+app.use(bodyParser.JSON());
+
 var articles={
 	'article-one':
 	{
@@ -132,7 +135,10 @@ app.get('/hash/:input',function(req,res){
 	res.send(hashedString)
 });
 
-app.get('/create-user',function(Req,res){
+app.post('/create-user',function(Req,res){
+	var username=req.body.username;
+	var password=req.body.password;
+
 	var salt=crypto.getRandomBytes(128).toString('hex');
 	var dbString=hash(password,salt);
 	pool.query('Insert into "user" (username,password) values ($1,$2)',[username,dbString],function(err,result){
