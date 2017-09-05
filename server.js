@@ -151,6 +151,7 @@ app.post('/create-user',function(Req,res){
 			res.send("User successfully created"+username);
 		}
 });
+});
 
 
 app.get('/database',function(rew,res){
