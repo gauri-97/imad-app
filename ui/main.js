@@ -58,3 +58,33 @@ submit.onclick= function(){
 	request.open('GET','http://localhost:2345/submit-name?name='+name,true);
 	request.send(null);
 };
+var submit=document.getElementById('sub_btn2');
+submit.onclick= function(){
+
+	var request=new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if(request.readyState===XMLHttpRequest.DONE)
+		{
+			if(request.status===200)
+			{
+				console.log("Succesfully logged in");
+				alert("Succesfully logged in");
+			}
+			else if(request.status===403)
+			{
+				alert('Username/password is incorrect');
+			}
+			else if(request.status===500)
+			{
+				alert('OOPS!Something went wrong');
+			}
+		}
+	};
+		var username=document.getElementById('username');
+		var password=document.getElementById('password');
+		console.log(username);
+		console.log(password);
+	request.open('POST','http://localhost:2345/login',true);
+	request.SetRequestHeader('Content type','application/json');
+	request.send(JSON.stringfy({username:username,password:password}));
+};
