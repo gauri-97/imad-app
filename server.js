@@ -5,6 +5,7 @@ var app = express();
 var Pool=require('pg').Pool;
 var crypto=require('crypto');
 var bodyParser=require('body-parser');
+var session=require('express-session')
 var config={
 	user:'postgres',
 	database:'postgres',
@@ -15,7 +16,10 @@ var config={
 var pool=new Pool(config);
 app.use(morgan('combined'));
 app.use(bodyParser.json());
-
+app.use(session({
+	secret:'somerandomvalue',
+	cookie: {maxAge:(1000*60*24*30)}
+}));
 var articles={
 	'article-one':
 	{
@@ -175,6 +179,7 @@ app.post('/login',function(req,res){
 				var hashedPassword=hash(password,salt);
 				if(hashedPassword===dbString)
 				{
+					req.session.auth={userid:results.rows[0].id};
 					res.send("User successfully logged in");
 				}
 				else
@@ -189,7 +194,7 @@ app.post('/login',function(req,res){
 });
 
 
-app.get('/database',function(rew,res){
+app.get('/database',function(req,res){
 	pool.query('SELECT * from articles',function(err,result){
 		if(err)
 		{
@@ -203,7 +208,18 @@ app.get('/database',function(rew,res){
  
 });
 	
-
+app.get('/check-login',function(req,res){
+	if(req.session && req.session.auth && req.session.auth.userid){
+		res.send('you are logged in'+req.session.auth.userid.toString());
+	}
+	else{
+		res.send('You are not logged in');
+	}
+});
+app.get('/logout',function(req,res){
+	delete req.session.auth;
+	res.send('you are logged out');
+})
 // Do not change port, otherwise your app won't run on IMAD servers
 // Use 8080 only for local development if you already have apache running on 80
 
