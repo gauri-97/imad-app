@@ -1,4 +1,5 @@
 console.log('Loaded!');
+
 var img=document.getElementById("image");
 var marginLeft=0;
 function moveRight()
@@ -58,6 +59,7 @@ submit.onclick= function(){
 	request.open('GET','http://localhost:2345/submit-name?name='+name,true);
 	request.send(null);
 };
+
 var submit=document.getElementById('sub_btn2');
 submit.onclick= function(){
 
@@ -81,10 +83,10 @@ submit.onclick= function(){
 		}
 	};
 		var username=document.getElementById('username');
+		username=username.value;	
 		var password=document.getElementById('password');
-		console.log(username);
-		console.log(password);
+		password=password.value;
 	request.open('POST','http://localhost:2345/login',true);
-	request.SetRequestHeader('Content type','application/json');
-	request.send(JSON.stringfy({username:username,password:password}));
+	request.setRequestHeader('Content-Type','application/json');
+	request.send(JSON.stringify({username:username,password:password}));
 };
